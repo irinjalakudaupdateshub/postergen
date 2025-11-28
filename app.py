@@ -31,7 +31,8 @@ DEFAULT_PASSWORD = "imagegen2024"
 if 'generated_images' not in st.session_state:
     st.session_state.generated_images = []
 if 'api_key' not in st.session_state:
-    st.session_state.api_key = ""
+    # Try to load API key from environment variable
+    st.session_state.api_key = os.getenv("GEMINI_API_KEY", "")
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
