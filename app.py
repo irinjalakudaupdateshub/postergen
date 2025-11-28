@@ -1,5 +1,5 @@
 """
-Streamlit App for Gemini 3 Image Generation
+Streamlit App for AI Poster Generation
 Supports multiple image uploads, prompt templates, and customizable placeholders
 """
 
@@ -19,7 +19,7 @@ from templates import (
 
 # Page configuration
 st.set_page_config(
-    page_title="Gemini 3 Image Generator",
+    page_title="AI Poster Generator",
     page_icon="🎨",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -58,8 +58,9 @@ def check_password():
         st.markdown("""
         <div style="text-align: center; padding: 3rem 0;">
             <h1 style="color: #667eea; font-size: 3rem;">🎨</h1>
-            <h2 style="color: #333;">Gemini 3 Image Generator</h2>
+            <h2 style="color: #333;">AI Poster Generator</h2>
             <p style="color: #666; font-size: 1.1rem;">Please enter the password to access the app</p>
+            <p style="color: #888; font-size: 0.95rem; margin-top: 1rem;">After login, click <strong>Generate</strong> to create posters for Jose J Chittilappilly</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -147,7 +148,7 @@ st.markdown("""
 # Enhanced title and description
 st.markdown("""
 <div class="main-header">
-    <h1>🎨 Gemini 3 Image Generator</h1>
+    <h1>🎨 AI Poster Generator</h1>
     <p>Create stunning Kerala election posters with AI-powered image generation</p>
 </div>
 """, unsafe_allow_html=True)
@@ -177,10 +178,10 @@ with st.sidebar:
         st.success(f"✅ Configured via {api_key_source}")
     else:
         api_key = st.text_input(
-            "Gemini API Key",
+            "API Key",
             type="password",
             value=st.session_state.api_key,
-            help="Enter your Gemini API key",
+            help="Enter your API key",
             label_visibility="collapsed"
         )
         st.session_state.api_key = api_key
@@ -382,7 +383,7 @@ with col2:
     if generate_button:
         # Validation
         if not st.session_state.api_key:
-            st.error("❌ Please enter your Gemini API key in the sidebar")
+            st.error("❌ Please enter your API key in the sidebar")
         elif not images_to_use:
             st.error("❌ Please upload at least one reference image or ensure default images exist")
         elif not all(placeholder_values.values()):
@@ -553,6 +554,6 @@ with col2:
 st.divider()
 st.markdown("""
 <div style='text-align: center; color: #666;'>
-    <p>Powered by Gemini 3 Pro Image Preview Beta| Built with Streamlit</p>
+    <p>AI-Powered Poster Generation | Built with Streamlit</p>
 </div>
 """, unsafe_allow_html=True)
