@@ -45,14 +45,6 @@ if 'authenticated' not in st.session_state:
 def check_password():
     """Returns True if the user entered the correct password."""
     
-    def password_entered():
-        """Checks whether a password entered by the user is correct."""
-        if st.session_state["password"] == DEFAULT_PASSWORD:
-            st.session_state.authenticated = True
-            del st.session_state["password"]  # Don't store password
-        else:
-            st.session_state.authenticated = False
-    
     if not st.session_state.authenticated:
         # Show login form
         st.markdown("""
@@ -66,16 +58,21 @@ def check_password():
         
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            st.text_input(
-                "Password",
-                type="password",
-                on_change=password_entered,
-                key="password",
-                placeholder="Enter password"
-            )
+            with st.form("login_form"):
+                password = st.text_input(
+                    "Password",
+                    type="password",
+                    placeholder="Enter password"
+                )
+                submit = st.form_submit_button("Login", type="primary", use_container_width=True)
             
-            if st.session_state.get("authenticated") == False and "password" not in st.session_state:
-                st.error("😕 Incorrect password. Please try again.")
+            if submit:
+                if password == DEFAULT_PASSWORD:
+                    st.session_state.authenticated = True
+                    st.rerun()
+                else:
+                    st.session_state.authenticated = False
+                    st.error("😕 Incorrect password. Please try again.")
         
         return False
     else:
