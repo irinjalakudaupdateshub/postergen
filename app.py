@@ -352,22 +352,25 @@ with col1:
             )
             placeholder_values[placeholder] = value
     
-    # Show final prompt with placeholders replaced
-    st.markdown("#### 📝 Final Prompt Preview")
-    st.caption("✨ Review and edit the prompt before generating")
     
-    # Replace placeholders to show preview
-    preview_prompt = replace_placeholders(template, placeholder_values)
-    
-    # Editable text area for the final prompt
-    # Use template name in key so it resets when template changes
-    final_prompt_edited = st.text_area(
-        "Edit Prompt (optional)",
-        value=preview_prompt,
-        height=300,
-        key=f"final_prompt_editor_{selected_template}",
-        help="You can edit the prompt here before generating the image"
-    )
+    # Show final prompt with placeholders replaced in an expander
+    with st.expander("📝 **Final Prompt Preview**", expanded=False):
+        st.caption("✨ Review and edit the prompt before generating")
+        
+        # Replace placeholders to show preview
+        preview_prompt = replace_placeholders(template, placeholder_values)
+        
+        # Editable text area for the final prompt
+        # Use template name in key so it resets when template changes
+        final_prompt_edited = st.text_area(
+            "Edit Prompt (optional)",
+            value=preview_prompt,
+            height=300,
+            key=f"final_prompt_editor_{selected_template}",
+            help="You can edit the prompt here before generating the image",
+            label_visibility="collapsed"
+        )
+
 
 with col2:
     st.markdown('<div class="section-header">🎨 Generated Output</div>', unsafe_allow_html=True)
