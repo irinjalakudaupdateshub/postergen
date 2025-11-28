@@ -252,10 +252,8 @@ with col1:
             # Create a more user-friendly label
             label = placeholder.replace("_", " ").title()
             
-            # Add emoji based on field type
-            if "name" in placeholder.lower() and "party" not in placeholder.lower():
-                icon = "👤"
-            elif "panchayath" in placeholder.lower() or "constituency" in placeholder.lower():
+            # Add emoji based on field type (check symbol before name!)
+            if "panchayath" in placeholder.lower() or "constituency" in placeholder.lower():
                 icon = "📍"
             elif "party" in placeholder.lower():
                 icon = "🏛️"
@@ -263,29 +261,33 @@ with col1:
                 icon = "🎯"
             elif "tagline" in placeholder.lower():
                 icon = "💬"
+            elif "name" in placeholder.lower():
+                icon = "👤"
             else:
                 icon = "📝"
             
-            # Provide helpful defaults or hints
-            if "tagline" in placeholder.lower():
-                help_text = "Enter a catchy campaign tagline in Malayalam"
-                default_value = "വികസനത്തിനായി ജോസ് മാഷ്"
-            elif "name" in placeholder.lower() and "party" not in placeholder.lower():
-                help_text = "Enter the candidate's name in Malayalam"
-                default_value = "ജോസ് ജെ. ചിറ്റിലപ്പിള്ളി"
-            elif "panchayath" in placeholder.lower() or "constituency" in placeholder.lower():
+            # Provide helpful defaults based on exact placeholder names
+            placeholder_lower = placeholder.lower()
+            
+            if placeholder == "Panchayath/Constituency Name":
                 help_text = "Enter the panchayath/constituency name in Malayalam"
                 default_value = "തൃശ്ശൂർ ജില്ലാ പഞ്ചായത്ത് മുരിയാട് ഡിവിഷൻ"
-            elif "party" in placeholder.lower() and "initials" in placeholder.lower():
-                help_text = "Enter party initials (e.g., LDF, UDF, NDA)"
-                default_value = "LDF"
-            elif "symbol" in placeholder.lower() and "name" in placeholder.lower():
+            elif placeholder == "Candidate Name":
+                help_text = "Enter the candidate's name in Malayalam"
+                default_value = "ജോസ് ജെ. ചിറ്റിലപ്പിള്ളി"
+            elif placeholder == "Symbol Name":
                 help_text = "Enter the election symbol name in Malayalam"
                 default_value = "അരിവാൾ ചുറ്റിക നക്ഷത്രം"
-            elif "symbol" in placeholder.lower() and "description" in placeholder.lower():
+            elif placeholder == "Symbol Description":
                 help_text = "Describe the symbol (e.g., hammer and sickle with star)"
                 default_value = "അരിവാൾ ചുറ്റിക നക്ഷത്രം"
-            elif "party" in placeholder.lower() and "full" in placeholder.lower():
+            elif placeholder == "Campaign Tagline":
+                help_text = "Enter a catchy campaign tagline in Malayalam"
+                default_value = "വികസനത്തിനായി ജോസ് മാഷ്"
+            elif placeholder == "Party Name Initials":
+                help_text = "Enter party initials (e.g., LDF, UDF, NDA)"
+                default_value = "LDF"
+            elif placeholder == "Full Party Name":
                 help_text = "Enter the full party name"
                 default_value = "LDF"
             else:
@@ -308,11 +310,12 @@ with col1:
     preview_prompt = replace_placeholders(template, placeholder_values)
     
     # Editable text area for the final prompt
+    # Use template name in key so it resets when template changes
     final_prompt_edited = st.text_area(
         "Edit Prompt (optional)",
         value=preview_prompt,
         height=300,
-        key="final_prompt_editor",
+        key=f"final_prompt_editor_{selected_template}",
         help="You can edit the prompt here before generating the image"
     )
 
