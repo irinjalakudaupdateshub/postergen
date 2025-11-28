@@ -31,8 +31,12 @@ DEFAULT_PASSWORD = "imagegen2024"
 if 'generated_images' not in st.session_state:
     st.session_state.generated_images = []
 if 'api_key' not in st.session_state:
-    # Try to load API key from environment variable
-    st.session_state.api_key = os.getenv("GEMINI_API_KEY", "")
+    # Try to load API key from Streamlit secrets first, then environment variable
+    try:
+        st.session_state.api_key = st.secrets.get("GEMINI_API_KEY", "")
+    except (FileNotFoundError, KeyError):
+        # Fall back to environment variable if secrets not configured
+        st.session_state.api_key = os.getenv("GEMINI_API_KEY", "")
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
@@ -153,17 +157,36 @@ with st.sidebar:
     
     # API Key input with info
     st.markdown("#### 🔑 API Key")
-    api_key = st.text_input(
-        "Gemini API Key",
-        type="password",
-        value=st.session_state.api_key,
-        help="Enter your Gemini API key",
-        label_visibility="collapsed"
-    )
-    st.session_state.api_key = api_key
     
-    if not api_key:
-        st.info("💡 Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)")
+    # Check if API key is from secrets or environment
+    api_key_from_external = False
+    api_key_source = ""
+    
+    try:
+        if st.secrets.get("GEMINI_API_KEY"):
+            api_key_from_external = True
+            api_key_source = "Streamlit secrets"
+    except (FileNotFoundError, KeyError):
+        if os.getenv("GEMINI_API_KEY"):
+            api_key_from_external = True
+            api_key_source = "environment variable"
+    
+    # Only show input field if API key is NOT from external source
+    if api_key_from_external:
+        st.success(f"✅ Configured via {api_key_source}")
+    else:
+        api_key = st.text_input(
+            "Gemini API Key",
+            type="password",
+            value=st.session_state.api_key,
+            help="Enter your Gemini API key",
+            label_visibility="collapsed"
+        )
+        st.session_state.api_key = api_key
+        
+        if not api_key:
+            st.info("💡 Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)")
+            st.caption("Set in `.streamlit/secrets.toml` or as environment variable")
     
     st.divider()
     
