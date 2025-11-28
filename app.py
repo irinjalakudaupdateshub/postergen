@@ -21,7 +21,8 @@ from templates import (
 st.set_page_config(
     page_title="Gemini 3 Image Generator",
     page_icon="🎨",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # Default password (you can change this)
@@ -244,31 +245,56 @@ with col1:
     template = get_template(selected_template)
     
     # Image upload in an expander for better organization
-    with st.expander("📸 **Upload Reference Images**", expanded=True):
+    with st.expander("📸 **Upload Reference Images**", expanded=False):
+        # Load default images from default_pics folder
+        default_pics_dir = "default_pics"
+        default_images = []
+        
+        if os.path.exists(default_pics_dir):
+            for filename in os.listdir(default_pics_dir):
+                if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    default_images.append(os.path.join(default_pics_dir, filename))
+        
+        # Show info about default images
+        if default_images and not st.session_state.get('uploaded_files_used', False):
+            st.info(f"📁 {len(default_images)} default image(s) loaded from `{default_pics_dir}/`")
+        
         uploaded_files = st.file_uploader(
             "Upload candidate photos (1-5 images)",
             type=["png", "jpg", "jpeg"],
             accept_multiple_files=True,
-            help="Upload reference images for the candidate",
+            help="Upload reference images for the candidate (will override default images)",
             label_visibility="collapsed"
         )
         
-        # Display uploaded images
+        # Use uploaded files if provided, otherwise use default images
         if uploaded_files:
+            st.session_state.uploaded_files_used = True
+            images_to_use = uploaded_files
             st.success(f"✅ {len(uploaded_files)} image(s) uploaded")
-            cols = st.columns(min(len(uploaded_files), 3))
-            for idx, file in enumerate(uploaded_files[:3]):  # Show max 3 thumbnails
+        else:
+            st.session_state.uploaded_files_used = False
+            images_to_use = default_images
+        
+        # Display images (uploaded or default)
+        if images_to_use:
+            cols = st.columns(min(len(images_to_use), 3))
+            for idx, file in enumerate(list(images_to_use)[:3]):  # Show max 3 thumbnails
                 with cols[idx]:
-                    image = Image.open(file)
-                    st.image(image, caption=file.name, use_container_width=True)
-            if len(uploaded_files) > 3:
-                st.info(f"➕ {len(uploaded_files) - 3} more image(s)")
+                    if isinstance(file, str):  # Default image path
+                        image = Image.open(file)
+                        st.image(image, caption=os.path.basename(file), use_container_width=True)
+                    else:  # Uploaded file
+                        image = Image.open(file)
+                        st.image(image, caption=file.name, use_container_width=True)
+            if len(images_to_use) > 3:
+                st.info(f"➕ {len(images_to_use) - 3} more image(s)")
     
     # Extract placeholders from template
     placeholders = extract_placeholders(template)
     
     # Placeholder inputs in an expander
-    with st.expander("✏️ **Fill in Campaign Details**", expanded=True):
+    with st.expander("✏️ **Fill in Campaign Details**", expanded=False):
         placeholder_values = {}
         
         # Group placeholders in columns for better layout
@@ -354,8 +380,8 @@ with col2:
         # Validation
         if not st.session_state.api_key:
             st.error("❌ Please enter your Gemini API key in the sidebar")
-        elif not uploaded_files:
-            st.error("❌ Please upload at least one reference image")
+        elif not images_to_use:
+            st.error("❌ Please upload at least one reference image or ensure default images exist")
         elif not all(placeholder_values.values()):
             st.warning("⚠️ Some placeholders are empty. Please fill in all fields for best results.")
         else:
@@ -370,11 +396,15 @@ with col2:
                     # Prepare content list
                     content = [final_prompt]
                     
-                    # Add uploaded images
-                    for uploaded_file in uploaded_files:
-                        # Reset file pointer
-                        uploaded_file.seek(0)
-                        image = Image.open(uploaded_file)
+                    # Add images (uploaded or default)
+                    for img_file in images_to_use:
+                        if isinstance(img_file, str):  # Default image path
+                            image = Image.open(img_file)
+                        else:  # Uploaded file
+                            # Reset file pointer
+                            img_file.seek(0)
+                            image = Image.open(img_file)
+                        
                         # Convert to RGB if necessary (handles RGBA, grayscale, etc.)
                         if image.mode != 'RGB':
                             image = image.convert('RGB')
