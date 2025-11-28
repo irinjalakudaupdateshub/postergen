@@ -554,6 +554,6 @@ with col2:
 st.divider()
 st.markdown("""
 <div style='text-align: center; color: #666;'>
-    <p>AI-Powered Poster Generation | Built with Streamlit</p>
+    <p>Vote for Jose J Chittilappilly | Built By IrinjalakudaUpdatesHub</p>
 </div>
 """, unsafe_allow_html=True)
